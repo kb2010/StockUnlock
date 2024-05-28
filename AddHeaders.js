@@ -25,26 +25,33 @@
     // Function to create the buttons with the correct ticker
     function createButtons(ticker) {
         const buttonsHTML = `
-            <div class="css-b2x44j">
-                <a class="MuiTypography-root MuiTypography-inherit MuiLink-root MuiLink-underlineAlways css-1pus56s" href="/valuation/?initialTicker=${ticker}">
-                    <button class="MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeMedium MuiButton-containedSizeMedium MuiButtonBase-root css-gz8nge" tabindex="0" type="button">
-                        <span class="MuiButton-startIcon MuiButton-iconSizeMedium css-6xugel">
-                            <!-- SVG for DCF button -->
-                        </span>
-                        <div class="MuiTypography-root MuiTypography-body2 css-11vc980">Go to DCF</div>
-                        <span class="MuiTouchRipple-root css-w0pj6f"></span>
-                    </button>
-                </a>
-                <a class="MuiTypography-root MuiTypography-inherit MuiLink-root MuiLink-underlineAlways css-1pus56s" href="/freeForm?initialTickers=${ticker}">
-                    <button class="MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeMedium MuiButton-containedSizeMedium MuiButtonBase-root css-1lmquvn" tabindex="0" type="button">
-                        <span class="MuiButton-startIcon MuiButton-iconSizeMedium css-6xugel">
-                            <!-- SVG for Free Form button -->
-                        </span>
-                        <div class="MuiTypography-root MuiTypography-body2 css-11vc980">Go to Free Form</div>
-                        <span class="MuiTouchRipple-root css-w0pj6f"></span>
-                    </button>
-                </a>
-            </div>
+        <style>
+            .button {
+                border: none;
+                color: white;
+                padding: 15px 32px;
+                text-align: center;
+                text-decoration: none;
+                display: inline-block;
+                font-size: 16px;
+                margin: 4px 2px;
+                cursor: pointer;
+            }
+            .button-green {
+                background-color: #04AA6D; /* Green */
+            }
+            .button-blue {
+                background-color: #008CBA; /* Blue */
+            }
+        </style>
+        <div class="button-container">
+            <a href="/valuation/?initialTicker=${ticker}">
+                <button class="button button-green" type="button">Go to DCF</button>
+            </a>
+            <a href="/freeForm?initialTickers=${ticker}">
+                <button class="button button-blue" type="button">Go to Free Form</button>
+            </a>
+        </div>
         `;
         return buttonsHTML;
     }
@@ -53,17 +60,25 @@
     function addButtonsToHeader() {
         const ticker = getTickerFromURL();
         if (ticker) {
-            // Use a mutation observer to wait for the header div to be available
+            // Use a mutation observer to wait for the h5 element to be available
             const observer = new MutationObserver(function(mutations, me) {
-                const headerDiv = document.querySelector('.css-1i8o3xl');
-                if (headerDiv) {
-                    // Create a container element for the new buttons
-                    const container = document.createElement('div');
-                    container.innerHTML = createButtons(ticker);
-                    // Append the container as the last child of the header div
-                    headerDiv.appendChild(container);
-                    me.disconnect(); // stop observing
-                    return;
+                // Find the h5 element that contains the ticker text
+                const h5 = Array.from(document.querySelectorAll('h5')).find(el => el.textContent.includes(ticker));
+                if (h5) {
+                    // Traverse up the DOM to find the parent div of the h5 element
+                    let parentDiv = h5.parentElement.parentElement;
+                    while (parentDiv && parentDiv.tagName !== 'DIV') {
+                        parentDiv = parentDiv.parentElement;
+                    }
+                    if (parentDiv) {
+                        // Create a container element for the new buttons
+                        const container = document.createElement('div');
+                        container.innerHTML = createButtons(ticker);
+                        // Append the container as the last child of the parent div
+                        parentDiv.appendChild(container);
+                        me.disconnect(); // stop observing
+                        return;
+                    }
                 }
             });
 
